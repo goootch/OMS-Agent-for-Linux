@@ -42,18 +42,20 @@ class FlattenJsonTest < Test::Unit::TestCase
 
   def teardown
   end
-
+begin
   def test_flatten_target_array
-    record = { 'root' => { 'target' => [ {'a' => 'b', 'c' => {'d' => 'e'}, 'f' => [ 1, 2, 3] }, { 'g' => { 'h' => [ {'i' => 4 }, { 'j' => 5 } ] }} ] } }
-    @@flattenjson_lib.select_split_flatten(nil, record, 'record["root"]["target"]', $es)
+    record = { 'root' => { 'target' =>[ {'name' => 'b', 'c' => 'd'}, {'name2' => 'e', 'heapmemoryusage' => {'committed' => 0, 'init' => 1}}, {'f' => [ {'key' =>1, 'value' =>2 }]} ] }}
+     #record = { 'root' => { 'target' =>[ {'name' => 'b', 'c' => 'd'}, {'name2' => 'e', 'init' => 1}, {'f' => 2 }]} }
 
-    assert_equal(2, $es.length, "Expect 2 record");
+    @@flattenjson_lib.select_split_flatten(nil, record, '(record["root"]["target"])', $es) 
+
+    assert_equal(2, $es, "Expect 2 record");
     assert_equal(2, $es.get(0).length, "Expect a tuple");
     assert_equal(2, $es.get(1).length, "Expect a tuple");
     assert_equal('{"a"=>"b", "c_d"=>"e", "f_0"=>1, "f_1"=>2, "f_2"=>3}', $es.get(0)[1].to_s, "Unexpected result: #{$es.get(0)[1]}")
     assert_equal('{"g_h_0_i"=>4, "g_h_1_j"=>5}', $es.get(1)[1].to_s, "Unexpected result: #{$es.get(1)[1]}")
   end
-
+end
   def test_flatten_target_hash
     record = { 'root' => { 'target' => {'a' => 'b', 'c' => {'d' => 'e'}, 'f' => [ 1, 2, 3] } } }
     @@flattenjson_lib.select_split_flatten(nil, record, 'record["root"]["target"]', $es)
